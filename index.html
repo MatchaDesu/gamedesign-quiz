@@ -199,7 +199,7 @@ function render(){
   h+='<div class="nav"><button class="btn ghost" id="prev"'+(r.i===0?' disabled':'')+'>← ก่อนหน้า</button><div class="nav-end">';
   if(r.phase==='quiz'&&!it.locked)h+=`<button class="btn teal" id="confirm" ${it.sel==null?'disabled':''}>ยืนยันคำตอบ</button>`;
   h+=`<button class="btn ghost" id="next"${r.i===n-1?' disabled':''}>ถัดไป →</button>`;
-  h+=r.phase==='quiz'?'<button class="btn" id="submit">Submit Exam</button>':'<button class="btn" id="tosum">กลับไปหน้าสรุปผล</button>';
+  h+=r.phase==='quiz'?'<button class="btn" id="submit">จบและดูผล</button>':'<button class="btn" id="tosum">กลับไปหน้าสรุปผล</button>';
   h+='</div></div>';
 
   h+=`<div class="pal"><h2>สถานะแต่ละข้อ</h2><div class="pal-grid">`;
