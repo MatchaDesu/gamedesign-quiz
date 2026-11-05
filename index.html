@@ -227,7 +227,7 @@ function render(){
 
 function submit(){
   const r=run,left=r.items.length-answered();
-  if(left>0&&!confirm(`ยังไม่ได้ตอบ ${left} ข้อ ต้องการส่งข้อสอบหรือไม่?`))return;
+  if(left>0&&!confirm(`ยังไม่ได้ตอบ ${left} ข้อ ต้องการจบและดูผลหรือไม่?`))return;
   r.items.forEach(x=>x.locked=true);
   r.phase='summary';
   const score=r.items.filter(x=>x.sel===x.right).length;
