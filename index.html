@@ -92,11 +92,6 @@ li:not(.right):not(.wrong) .badge{color:var(--muted);border:1px solid var(--line
 
 h1.title{font-size:1.5rem;color:var(--primary);margin:6px 0 4px}
 .lead{color:var(--ink);margin:0 0 18px}
-.modes{display:grid;gap:10px;margin:0 0 22px}
-.mode{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;cursor:pointer}
-.mode input{margin-top:.45em;accent-color:var(--primary);width:18px;height:18px}
-.mode.on{background:var(--selected);border:2px solid var(--primary);padding:11px 13px}
-.mode small{display:block;color:var(--muted)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px}
 .chap{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px;text-align:left;cursor:pointer;line-height:1.6}
 .chap:hover{border-color:var(--primary)}
@@ -137,7 +132,7 @@ function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor
 function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
 function top0(){window.scrollTo(0,0)}
 
-let run=null, modeSel=store('gd-mode')||'practice';
+let run=null;
 
 function home(){
   run=null;statusEl.textContent='';bar.style.width='0';
@@ -145,16 +140,12 @@ function home(){
   const ids=Object.keys(window.QUIZ).map(Number).sort((a,b)=>a-b);
   const tot=ids.reduce((s,i)=>s+window.QUIZ[i].qs.length,0);
   let h=`<h1 class="title">เลือกบทที่ต้องการทำ</h1>
-  <p class="lead">ข้อสอบปรนัย 5 ตัวเลือก (ก–จ) ทุกข้อมีเฉลยและคำอธิบายครบทุกตัวเลือก ลำดับข้อและตัวเลือกจะถูกสุ่มใหม่ทุกครั้ง</p>
-  <div class="modes" role="radiogroup" aria-label="โหมดการทำข้อสอบ">
-   <label class="mode ${modeSel==='practice'?'on':''}"><input type="radio" name="mode" value="practice" ${modeSel==='practice'?'checked':''}><span><b>โหมดฝึก</b><small>เลือกคำตอบ → กดยืนยัน → ได้เฉลยพร้อมคำอธิบายทันที (ยืนยันแล้วแก้ไม่ได้)</small></span></label>
-   <label class="mode ${modeSel==='exam'?'on':''}"><input type="radio" name="mode" value="exam" ${modeSel==='exam'?'checked':''}><span><b>โหมดสอบ</b><small>ทำต่อเนื่อง ย้อนกลับไปแก้คำตอบได้ ยังไม่เฉลยจนกด Submit Exam</small></span></label>
-  </div><div class="grid">`;
+  <p class="lead">ข้อสอบปรนัย 5 ตัวเลือก (ก–จ) ทุกข้อมีเฉลยและคำอธิบายครบทุกตัวเลือก ลำดับข้อและตัวเลือกจะถูกสุ่มใหม่ทุกครั้ง เลือกคำตอบแล้วกด “ยืนยันคำตอบ” เพื่อดูเฉลย</p>
+  <div class="grid">`;
   ids.forEach(id=>{const q=window.QUIZ[id],b=best[id];
     h+=`<button class="chap" data-id="${id}"><b>บทที่ ${id}</b> · ${esc(q.title)}<small>${q.qs.length} ข้อ${b!=null?` · คะแนนสูงสุด ${b}/${q.qs.length}`:''}</small></button>`});
   h+=`<button class="chap" data-id="all"><b>รวมทุกบท</b> · สุ่ม 30 ข้อ<small>จากทั้งหมด ${tot} ข้อ${best.all!=null?` · คะแนนสูงสุด ${best.all}/30`:''}</small></button></div>`;
   app.innerHTML=h;
-  app.querySelectorAll('input[name=mode]').forEach(r=>r.onchange=()=>{modeSel=r.value;store('gd-mode',modeSel);app.querySelectorAll('.mode').forEach(m=>m.classList.toggle('on',m.querySelector('input').checked))});
   app.querySelectorAll('.chap').forEach(b=>b.onclick=()=>start(b.dataset.id));
   top0();
 }
@@ -167,7 +158,7 @@ function start(id){
   }else{
     items=shuffle(window.QUIZ[id].qs.map(q=>({q,ch:id})));title='บทที่ '+id+' · '+window.QUIZ[id].title;
   }
-  run={id,title,mode:modeSel,i:0,phase:'quiz',items:items.map(({q,ch})=>{
+  run={id,title,i:0,phase:'quiz',items:items.map(({q,ch})=>{
     const idx=shuffle([0,1,2,3,4]);
     return {ch,text:q[0],img:q[3]||null,opts:idx.map(k=>q[1][k]),exps:idx.map(k=>q[2][k]),right:idx.indexOf(0),sel:null,locked:false};
   })};
@@ -206,7 +197,7 @@ function render(){
   h+='</section>';
 
   h+='<div class="nav"><button class="btn ghost" id="prev"'+(r.i===0?' disabled':'')+'>← ก่อนหน้า</button><div class="nav-end">';
-  if(r.phase==='quiz'&&r.mode==='practice'&&!it.locked)h+=`<button class="btn teal" id="confirm" ${it.sel==null?'disabled':''}>ยืนยันคำตอบ</button>`;
+  if(r.phase==='quiz'&&!it.locked)h+=`<button class="btn teal" id="confirm" ${it.sel==null?'disabled':''}>ยืนยันคำตอบ</button>`;
   h+=`<button class="btn ghost" id="next"${r.i===n-1?' disabled':''}>ถัดไป →</button>`;
   h+=r.phase==='quiz'?'<button class="btn" id="submit">Submit Exam</button>':'<button class="btn" id="tosum">กลับไปหน้าสรุปผล</button>';
   h+='</div></div>';
@@ -219,7 +210,7 @@ function render(){
     if(k===r.i)c+=' cur';
     h+=`<button class="${c}" data-n="${k}" aria-label="ข้อ ${k+1}${x.sel!=null?' ตอบแล้ว':' ยังไม่ได้ตอบ'}">${k+1}</button>`;
   });
-  h+=`</div><div class="legend"><span><i></i>ยังไม่ได้ตอบ</span><span><i class="a"></i>ตอบแล้ว</span>`+(r.mode==='practice'||r.phase==='review'?'<span><i class="o"></i>ถูก</span><span><i class="n"></i>ผิด</span>':'')+`</div></div>`;
+  h+=`</div><div class="legend"><span><i></i>ยังไม่ได้ตอบ</span><span><i class="a"></i>ตอบแล้ว</span>`+'<span><i class="o"></i>ถูก</span><span><i class="n"></i>ผิด</span>'+`</div></div>`;
   h+=`<p style="margin-top:16px"><button class="btn ghost" id="quit">ออกไปเลือกบท</button></p>`;
   app.innerHTML=h;
 
@@ -250,7 +241,7 @@ function summary(){
   const ok=r.items.filter(x=>x.sel===x.right).length,sk=r.items.filter(x=>x.sel==null).length,no=n-ok-sk;
   const pct=Math.round(ok/n*100);
   statusEl.textContent='สรุปผลการสอบ';bar.style.width='100%';
-  let h=`<section class="card"><p class="qno">${esc(r.title)} · โหมด${r.mode==='practice'?'ฝึก':'สอบ'}</p>
+  let h=`<section class="card"><p class="qno">${esc(r.title)}</p>
   <p class="score">${ok} / ${n} <span style="font-size:1.1rem;color:var(--muted);font-weight:400">(${pct}%)</span></p>
   <div class="stats"><span class="st-ok">ถูก <b>${ok}</b></span><span class="st-no">ผิด <b>${no}</b></span><span class="st-sk">ไม่ได้ตอบ <b>${sk}</b></span></div>
   <div class="nav-end"><button class="btn teal" id="review">ทบทวนเฉลยทีละข้อ</button><button class="btn ghost" id="again">ทำใหม่ (สุ่มลำดับใหม่)</button><button class="btn ghost" id="toHome">เลือกบทอื่น</button></div></section>
