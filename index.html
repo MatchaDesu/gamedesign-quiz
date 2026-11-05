@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ควิซ Game Design — ฝึกทำข้อสอบรายบท</title>
+<meta name="description" content="ควิซปรนัย 5 ตัวเลือก ครบทุกบทของวิชา Game Design I พร้อมเฉลยและอธิบายทุกตัวเลือก">
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--ink:#1e293b;--muted:#64748b;--line:#e2e8f0;--acc:#4f46e5;--acc2:#eef2ff;--ok:#16a34a;--okbg:#f0fdf4;--bad:#dc2626;--badbg:#fef2f2;--warn:#d97706}
+@media(prefers-color-scheme:dark){:root{--bg:#0f172a;--card:#1e293b;--ink:#e2e8f0;--muted:#94a3b8;--line:#334155;--acc:#818cf8;--acc2:#1e1b4b;--ok:#4ade80;--okbg:#052e16;--bad:#f87171;--badbg:#450a0a;--warn:#fbbf24}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Sarabun","Leelawadee UI","Tahoma","Noto Sans Thai",system-ui,sans-serif;line-height:1.65;font-size:17px}
+.wrap{max-width:820px;margin:0 auto;padding:16px 16px 80px}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:6px 0 14px}
+header h1{font-size:1.25rem;margin:0}
+.btn{border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;background:var(--acc);color:#fff}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--acc);border:2px solid var(--acc)}
+.btn.small{padding:6px 12px;font-size:.9rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:12px 0;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.chap{cursor:pointer;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:12px 14px;font:inherit}
+.chap:hover{border-color:var(--acc);background:var(--acc2)}
+.chap b{color:var(--acc)}
+.chap small{display:block;color:var(--muted)}
+.bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin:6px 0 12px}
+.bar>i{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
+.meta{display:flex;justify-content:space-between;color:var(--muted);font-size:.92rem;flex-wrap:wrap;gap:6px}
+.q{font-size:1.08rem;font-weight:700;margin:6px 0 12px}
+.opt{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:10px 12px;margin:8px 0;font:inherit;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--acc)}
+.opt .lt{flex:0 0 auto;min-width:2.2em;height:2.2em;border-radius:50%;background:var(--acc2);color:var(--acc);display:flex;align-items:center;justify-content:center;font-weight:800}
+.opt.sel{border-color:var(--acc);background:var(--acc2)}
+.opt.sel .lt{background:var(--acc);color:#fff}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--ok);background:var(--okbg)}
+.opt.right .lt{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--bad);background:var(--badbg)}
+.opt.wrong .lt{background:var(--bad);color:#fff}
+.exp{margin:0 0 4px 46px;font-size:.95rem;color:var(--ink);padding:8px 10px;border-left:4px solid var(--line);background:var(--bg);border-radius:0 8px 8px 0}
+.exp.right{border-color:var(--ok)}
+.exp.bad{border-color:var(--bad)}
+.exp b.t{color:var(--ok)} .exp b.f{color:var(--bad)}
+.verdict{font-weight:800;font-size:1.05rem;margin:10px 0 2px}
+.verdict.ok{color:var(--ok)} .verdict.no{color:var(--bad)}
+.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+.score{font-size:2.4rem;font-weight:800;color:var(--acc);margin:0}
+.review li{margin:8px 0}
+.tag{display:inline-block;font-size:.8rem;border-radius:999px;padding:1px 10px;background:var(--acc2);color:var(--acc);font-weight:700}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>🎮 ควิซ Game Design</h1>
+  <button class="btn ghost small hide" id="homeBtn">← เลือกบท</button>
+</header>
+<main id="app"></main>
+</div>
+
+<script src="data/w01.js"></script><script src="data/w02.js"></script><script src="data/w03.js"></script>
+<script src="data/w04.js"></script><script src="data/w05.js"></script><script src="data/w06.js"></script>
+<script src="data/w07.js"></script><script src="data/w08.js"></script><script src="data/w09.js"></script>
+<script src="data/w10.js"></script><script src="data/w11.js"></script><script src="data/w12.js"></script>
+<script src="data/w13.js"></script>
+<script>
+(function(){
+const LET=['ก','ข','ค','ง','จ'];
+const app=document.getElementById('app'), homeBtn=document.getElementById('homeBtn');
+const $=(h)=>{const d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild};
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const strip=s=>String(s).replace(/^(ถูก|ผิด)\s*:\s*/,'');
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+
+let run=null;
+
+function home(){
+  run=null;homeBtn.classList.add('hide');
+  const best=store('gd-best')||{};
+  let h='<div class="card"><b>วิธีใช้:</b> เลือกบท → เลือกคำตอบ ก–จ → กด “ยืนยันคำตอบ” แล้วระบบจะเฉลยพร้อมอธิบายทุกตัวเลือกทันที (ทั้งข้อที่ถูกและข้อที่ผิด) ลำดับข้อและตัวเลือกถูกสุ่มใหม่ทุกครั้งที่เริ่ม</div><div class="grid">';
+  const ids=Object.keys(window.QUIZ).map(Number).sort((a,b)=>a-b);
+  ids.forEach(id=>{const q=window.QUIZ[id];const b=best[id];
+    h+=`<button class="chap" data-id="${id}"><b>บทที่ ${id}</b> · ${esc(q.title)}<small>${q.qs.length} ข้อ${b!=null?` · คะแนนสูงสุด ${b}/${q.qs.length}`:''}</small></button>`});
+  const tot=ids.reduce((s,i)=>s+window.QUIZ[i].qs.length,0);
+  h+=`<button class="chap" data-id="all"><b>🔀 รวมทุกบท</b> · สุ่ม 30 ข้อ<small>จากทั้งหมด ${tot} ข้อ${best.all!=null?` · คะแนนสูงสุด ${best.all}/30`:''}</small></button></div>`;
+  app.innerHTML=h;
+  app.querySelectorAll('.chap').forEach(b=>b.onclick=()=>start(b.dataset.id));
+}
+
+function start(id){
+  let items=[],title;
+  if(id==='all'){
+    Object.keys(window.QUIZ).forEach(k=>window.QUIZ[k].qs.forEach(q=>items.push({q,ch:k})));
+    items=shuffle(items).slice(0,30);title='รวมทุกบท (สุ่ม 30 ข้อ)';
+  }else{
+    items=shuffle(window.QUIZ[id].qs.map(q=>({q,ch:id})));title='บทที่ '+id+' · '+window.QUIZ[id].title;
+  }
+  run={id,title,i:0,score:0,answers:[],items:items.map(({q,ch})=>{
+    const idx=shuffle([0,1,2,3,4]);
+    return {ch,text:q[0],opts:idx.map(k=>q[1][k]),exps:idx.map(k=>q[2][k]),right:idx.indexOf(0)};
+  })};
+  homeBtn.classList.remove('hide');
+  show();
+}
+
+let sel=null,done=false;
+function show(){
+  const r=run,it=r.items[r.i];sel=null;done=false;
+  let h=`<div class="meta"><span>${esc(r.title)}</span><span>ข้อ ${r.i+1} / ${r.items.length} · คะแนน ${r.score}</span></div>
+  <div class="bar"><i style="width:${(r.i/r.items.length)*100}%"></i></div><div class="card">
+  ${r.id==='all'?`<span class="tag">บทที่ ${it.ch}</span>`:''}
+  <p class="q">${r.i+1}. ${esc(it.text)}</p><div id="opts">`;
+  it.opts.forEach((o,k)=>{h+=`<button class="opt" data-k="${k}"><span class="lt">${LET[k]}</span><span>${esc(o)}</span></button><div class="exp hide" id="e${k}"></div>`});
+  h+=`</div><div id="verdict"></div><div class="actions"><button class="btn" id="ok" disabled>ยืนยันคำตอบ</button><button class="btn hide" id="next">${r.i+1<r.items.length?'ข้อถัดไป →':'ดูผลสรุป'}</button></div></div>`;
+  app.innerHTML=h;window.scrollTo(0,0);
+  const okBtn=document.getElementById('ok');
+  app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(done)return;sel=+b.dataset.k;app.querySelectorAll('.opt').forEach(x=>x.classList.toggle('sel',x===b));okBtn.disabled=false});
+  okBtn.onclick=()=>confirmAns(it);
+}
+
+function confirmAns(it){
+  if(sel==null||done)return;done=true;const r=run;
+  const good=sel===it.right;if(good)r.score++;
+  r.answers.push({it,sel,good});
+  app.querySelectorAll('.opt').forEach((b,k)=>{
+    b.disabled=true;b.classList.remove('sel');
+    if(k===it.right)b.classList.add('right');else if(k===sel)b.classList.add('wrong');
+    const e=document.getElementById('e'+k);e.classList.remove('hide');
+    const isR=k===it.right;
+    e.classList.add(isR?'right':'bad');
+    e.innerHTML=`<b class="${isR?'t':'f'}">${isR?'✔ ข้อนี้ถูก':'✘ ข้อนี้ผิด'}${k===sel?' (คำตอบของคุณ)':''}</b> — ${esc(strip(it.exps[k]))}`;
+  });
+  document.getElementById('verdict').innerHTML=good?`<p class="verdict ok">✔ ถูกต้อง! (เฉลย: ${LET[it.right]})</p>`:`<p class="verdict no">✘ ยังไม่ถูก — คุณตอบ ${LET[sel]} คำตอบที่ถูกคือ ${LET[it.right]}</p>`;
+  document.getElementById('ok').classList.add('hide');
+  const nx=document.getElementById('next');nx.classList.remove('hide');nx.focus();
+  nx.onclick=()=>{r.i++;r.i<r.items.length?show():summary()};
+}
+
+function summary(){
+  const r=run,n=r.items.length,pct=Math.round(r.score/n*100);
+  const best=store('gd-best')||{};const key=r.id;
+  if(best[key]==null||r.score>best[key])best[key]=r.score;store('gd-best',best);
+  const wrong=r.answers.filter(a=>!a.good);
+  let h=`<div class="bar"><i style="width:100%"></i></div><div class="card"><p class="meta">${esc(r.title)}</p>
+  <p class="score">${r.score} / ${n} <small style="font-size:1rem;color:var(--muted)">(${pct}%)</small></p>
+  <p>${pct>=80?'🎉 ยอดเยี่ยม! เข้าใจเนื้อหาดีมาก':pct>=60?'👍 ดีแล้ว ลองทบทวนข้อที่พลาดดู':'📚 ควรอ่านชีทบทนี้ซ้ำอีกครั้ง แล้วลองทำใหม่'}</p>
+  <div class="actions" style="justify-content:flex-start"><button class="btn" id="again">ทำใหม่ (สุ่มลำดับใหม่)</button><button class="btn ghost" id="toHome">เลือกบทอื่น</button></div></div>`;
+  if(wrong.length){
+    h+=`<div class="card"><b>ข้อที่ตอบผิด (${wrong.length})</b><ol class="review">`;
+    wrong.forEach(a=>{h+=`<li>${esc(a.it.text)}<br><span style="color:var(--bad)">คุณตอบ ${LET[a.sel]}: ${esc(a.it.opts[a.sel])}</span><br><span style="color:var(--ok)">ที่ถูก ${LET[a.it.right]}: ${esc(a.it.opts[a.it.right])}</span><br><small style="color:var(--muted)">${esc(strip(a.it.exps[a.it.right]))}</small></li>`});
+    h+='</ol></div>';
+  }
+  app.innerHTML=h;window.scrollTo(0,0);
+  document.getElementById('again').onclick=()=>start(r.id);
+  document.getElementById('toHome').onclick=home;
+}
+
+homeBtn.onclick=()=>{if(!run||confirm('ออกจากควิซนี้? คะแนนปัจจุบันจะไม่ถูกบันทึก'))home()};
+home();
+})();
+</script>
+</body>
+</html>
