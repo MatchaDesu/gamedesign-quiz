@@ -131,11 +131,20 @@ const strip=s=>String(s).replace(/^(ถูก|ผิด)\s*:\s*/,'');
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
 function top0(){window.scrollTo(0,0)}
+/* ===== ระบบหลายหน้า: ใช้ History API ให้ปุ่ม Back ของเบราว์เซอร์ย้อนไปหน้าก่อนหน้า ===== */
+function apply(st){
+  if(!st||st.v==='home'||!run){if(st&&st.v!=='home')history.replaceState({v:'home'},'','#/');home();return}
+  run.i=st.i!=null?Math.max(0,Math.min(run.items.length-1,st.i)):run.i;
+  run.phase=st.v==='summary'?'summary':(st.v==='review'||run.done)?'review':'quiz';
+  render();top0();
+}
+function go(st){history.pushState(st,'','#/'+st.v+(st.i!=null?'/'+(st.i+1):''));apply(st)}
+window.addEventListener('popstate',e=>apply(e.state||{v:'home'}));
 
 let run=null;
 
 function home(){
-  run=null;statusEl.textContent='';bar.style.width='0';
+  statusEl.textContent='';bar.style.width='0';
   const best=store('gd-best')||{};
   const ids=Object.keys(window.QUIZ).map(Number).sort((a,b)=>a-b);
   const tot=ids.reduce((s,i)=>s+window.QUIZ[i].qs.length,0);
@@ -162,7 +171,7 @@ function start(id){
     const idx=shuffle([0,1,2,3,4]);
     return {ch,text:q[0],img:q[3]||null,opts:idx.map(k=>q[1][k]),exps:idx.map(k=>q[2][k]),right:idx.indexOf(0),sel:null,locked:false};
   })};
-  render();top0();
+  go({v:'q',i:0});
 }
 
 const answered=()=>run.items.filter(x=>x.sel!=null).length;
@@ -216,24 +225,24 @@ function render(){
 
   const $=id=>document.getElementById(id);
   app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(revealed(it))return;it.sel=+b.dataset.k;render()});
-  $('prev').onclick=()=>{if(r.i>0){r.i--;render();top0()}};
-  $('next').onclick=()=>{if(r.i<n-1){r.i++;render();top0()}};
+  $('prev').onclick=()=>{if(r.i>0)go({v:r.phase==='review'?'review':'q',i:r.i-1})};
+  $('next').onclick=()=>{if(r.i<n-1)go({v:r.phase==='review'?'review':'q',i:r.i+1})};
   if($('confirm'))$('confirm').onclick=()=>{if(it.sel!=null){it.locked=true;render();const e=document.querySelector('.result');if(e)e.scrollIntoView({block:'start'})}};
   if($('submit'))$('submit').onclick=submit;
-  if($('tosum'))$('tosum').onclick=()=>{r.phase='summary';render()};
-  $('quit').onclick=()=>{if(confirm('ออกจากข้อสอบนี้? ความคืบหน้าจะไม่ถูกบันทึก'))home()};
-  app.querySelectorAll('.pn').forEach(b=>b.onclick=()=>{r.i=+b.dataset.n;render();top0()});
+  if($('tosum'))$('tosum').onclick=()=>go({v:'summary'});
+  $('quit').onclick=()=>{if(confirm('ออกจากข้อสอบนี้? ความคืบหน้าจะไม่ถูกบันทึก'))go({v:'home'})};
+  app.querySelectorAll('.pn').forEach(b=>b.onclick=()=>go({v:r.phase==='review'?'review':'q',i:+b.dataset.n}));
 }
 
 function submit(){
   const r=run,left=r.items.length-answered();
   if(left>0&&!confirm(`ยังไม่ได้ตอบ ${left} ข้อ ต้องการจบและดูผลหรือไม่?`))return;
   r.items.forEach(x=>x.locked=true);
-  r.phase='summary';
+  r.done=true;
   const score=r.items.filter(x=>x.sel===x.right).length;
   const best=store('gd-best')||{};
   if(best[r.id]==null||score>best[r.id])best[r.id]=score;store('gd-best',best);
-  render();
+  go({v:'summary'});
 }
 
 function summary(){
@@ -249,13 +258,14 @@ function summary(){
   r.items.forEach((x,k)=>{h+=`<button class="pn ${x.sel==null?'':x.sel===x.right?'ok':'no'}" data-n="${k}" aria-label="ข้อ ${k+1}">${k+1}</button>`});
   h+='</div><div class="legend"><span><i class="o"></i>ถูก</span><span><i class="n"></i>ผิด</span><span><i></i>ไม่ได้ตอบ</span></div></div>';
   app.innerHTML=h;top0();
-  const go=k=>{r.phase='review';r.i=k;render();top0()};
-  document.getElementById('review').onclick=()=>go(0);
+  const gor=k=>go({v:'review',i:k});
+  document.getElementById('review').onclick=()=>gor(0);
   document.getElementById('again').onclick=()=>start(r.id);
-  document.getElementById('toHome').onclick=home;
-  app.querySelectorAll('.pn').forEach(b=>b.onclick=()=>go(+b.dataset.n));
+  document.getElementById('toHome').onclick=()=>go({v:'home'});
+  app.querySelectorAll('.pn').forEach(b=>b.onclick=()=>gor(+b.dataset.n));
 }
 
+history.replaceState({v:'home'},'','#/');
 home();
 })();
 </script>
