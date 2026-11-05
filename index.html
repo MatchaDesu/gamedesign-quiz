@@ -48,6 +48,37 @@ header h1{font-size:1.25rem;margin:0}
 .review li{margin:8px 0}
 .tag{display:inline-block;font-size:.8rem;border-radius:999px;padding:1px 10px;background:var(--acc2);color:var(--acc);font-weight:700}
 .hide{display:none}
+
+html{-webkit-text-size-adjust:100%}
+body{font-size:clamp(16px,1.1vw + 11px,20px)}
+.wrap{max-width:min(980px,100%);padding:clamp(12px,3vw,32px) clamp(12px,3vw,28px) 80px}
+.grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr))}
+.opt .lt{min-width:2.2em;width:2.2em}
+.opt span:last-child{min-width:0;overflow-wrap:anywhere}
+@media (min-width:1024px){
+  .wrap{max-width:1040px}
+  .card{padding:26px 32px}
+  .q{font-size:1.2rem}
+  .exp{margin-left:52px}
+}
+@media (min-width:700px) and (max-width:1023px){
+  .card{padding:22px 26px}
+  .btn{padding:12px 22px}
+  .opt{padding:14px 16px}
+}
+@media (max-width:600px){
+  header{flex-wrap:wrap}
+  header h1{font-size:1.1rem}
+  .card{padding:14px 14px;border-radius:6px}
+  .opt{padding:10px 10px;gap:8px}
+  .opt .lt{min-width:2em;width:2em;height:2em;font-size:.9rem}
+  .exp{margin-left:0;font-size:.97rem}
+  .actions{position:sticky;bottom:0;background:linear-gradient(transparent,var(--card) 30%);padding:10px 0 6px;margin-top:10px}
+  .actions .btn{flex:1;min-height:48px}
+  .meta{font-size:.85rem}
+  .score{font-size:2rem}
+}
+@media (hover:none){.opt,.chap,.btn{min-height:44px}}
 </style>
 </head>
 <body>
